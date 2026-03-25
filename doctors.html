@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a Doctor - Health Management App</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/doctors.css">
+</head>
+<body>
+    <div class="background-image"><img src="assets/images/medical.jpeg" alt="Medical"></div>
+
+    <header class="header">
+        <div class="logo-placeholder"><img src="assets/images/logo.png" alt="Logo"></div>
+        <h1>Ombrelle</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <h2>Find a Doctor</h2>
+        <p>Search for a doctor by specialty or location:</p>
+        
+        <form class="doctor-search-form">
+            <div class="form-group">
+                <label for="specialty">Specialty:</label>
+                <select id="specialty" name="specialty" required>
+                    <option value="">Select Specialty</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <select id="location" name="location" required>
+                    <option value="">Select Location</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            
+            <button type="button" onclick="searchDoctors()">Search</button>
+        </form>
+        
+        <div id="doctorResults" class="doctor-results"></div>
+    </div>
+
+    <script>
+        // Fetch specialties and locations from the server and populate dropdowns
+        window.onload = function() {
+            fetch('/get-specialties')
+                .then(response => response.json())
+                .then(data => {
+                    const specialtySelect = document.getElementById('specialty');
+                    data.specialties.forEach(specialty => {
+                        const option = document.createElement('option');
+                        option.value = specialty;
+                        option.textContent = specialty;
+                        specialtySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching specialties:', error));
+
+            fetch('/get-locations')
+                .then(response => response.json())
+                .then(data => {
+                    const locationSelect = document.getElementById('location');
+                    data.locations.forEach(location => {
+                        const option = document.createElement('option');
+                        option.value = location;
+                        option.textContent = location;
+                        locationSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching locations:', error));
+        };
+
+        // Function to search for doctors
+        function searchDoctors() {
+            const specialty = document.getElementById('specialty').value;
+            const location = document.getElementById('location').value;
+
+            // Perform a GET request to the server to search for doctors
+            fetch(`/search-doctors?specialty=${specialty}&location=${location}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsContainer = document.getElementById('doctorResults');
+                    resultsContainer.innerHTML = ''; // Clear previous results
+                    
+                    if (data.success) {
+                        data.doctors.forEach(doctor => {
+                            const doctorInfo = document.createElement('div');
+                            doctorInfo.classList.add('doctor-info');
+                            doctorInfo.innerHTML = `
+                                <h3>${doctor.name}</h3>
+                                <p><strong>Specialty:</strong> ${doctor.specialty}</p>
+                                <p><strong>Location:</strong> ${doctor.city}</p>
+                                <p><strong>Type:</strong> ${doctor.type}</p>
+                                <p><strong>Phone:</strong> ${doctor.phone_number}</p>
+                            `;
+                            resultsContainer.appendChild(doctorInfo);
+                        });
+                    } else {
+                        resultsContainer.innerHTML = `<p class="error">${data.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error searching doctors.');
+                });
+        }
+    </script>
+
+</body>
+</html>

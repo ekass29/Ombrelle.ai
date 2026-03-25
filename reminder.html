@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Reminders - Health Management App</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/reminder.css">
+    <style>
+        /* Small inline styles for the new elements */
+        .radio-group { margin: 10px 0; }
+        .radio-group label { margin-right: 15px; font-weight: normal; }
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .delete-btn:hover { background-color: #cc0000; }
+    </style>
+</head>
+<body>
+    <div class="background-image"><img src="assets/images/medical.jpeg" alt="Medical Background"></div>
+
+    <header class="header">
+        <div class="logo-placeholder"><img src="assets/images/logo.png" alt="Logo"></div>
+        <h1>Ombrelle</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <h1>Set a Reminder</h1>
+        <form id="reminderForm" class="reminder-form">
+            <label for="task">Task</label>
+            <input type="text" id="task" name="task" placeholder="e.g., Take medication" required>
+
+            <label for="phoneNumber">Phone Number (for SMS)</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="+1234567890" required>
+
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Time</label>
+            <input type="time" id="time" name="time" required>
+
+            <label>Repetition:</label>
+            <div class="radio-group">
+                <input type="radio" id="none" name="repetition" value="None" checked>
+                <label for="none">None</label>
+
+                <input type="radio" id="daily" name="repetition" value="Daily">
+                <label for="daily">Daily</label>
+
+                <input type="radio" id="weekly" name="repetition" value="Weekly">
+                <label for="weekly">Weekly</label>
+
+                <input type="radio" id="monthly" name="repetition" value="Monthly">
+                <label for="monthly">Monthly</label>
+            </div>
+
+            <label for="notes">Notes (optional)</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Add any additional notes..."></textarea>
+
+            <button type="button" class="btn-primary" onclick="setReminder()">Set Reminder</button>
+        </form>
+
+        <div id="reminderList" class="result-container">
+            <h3>Your Reminders</h3>
+            </div>
+    </div>
+
+    <script>
+        // Function to set a reminder
+        function setReminder() {
+            const task = document.getElementById('task').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const notes = document.getElementById('notes').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            
+            // Get selected radio button value
+            const repetition = document.querySelector('input[name="repetition"]:checked').value;
+
+            fetch('/set-reminder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task, date, time, notes, phoneNumber, repetition })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message); 
+                    fetchReminders(); 
+                } else {
+                    alert('Error setting reminder');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving reminder.');
+            });
+        }
+
+        // Function to delete a reminder
+        function deleteReminder(id) {
+            if(!confirm("Are you sure you want to delete this reminder?")) return;
+
+            fetch(`/delete-reminder/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    fetchReminders(); // Refresh list
+                } else {
+                    alert("Could not delete reminder.");
+                }
+            });
+        }
+
+        // Function to fetch all reminders
+        function fetchReminders() {
+            fetch('/get-reminders')
+                .then(response => response.json())
+                .then(data => {
+                    const reminderList = document.getElementById('reminderList');
+                    reminderList.innerHTML = ''; 
+                    
+                    if (data.success && data.reminders.length > 0) {
+                        data.reminders.forEach(reminder => {
+                            const reminderItem = document.createElement('div');
+                            reminderItem.classList.add('reminder-card');
+                            
+                            // Format date for display
+                            const dateObj = new Date(reminder.reminder_date);
+                            const dateStr = dateObj.toLocaleDateString();
+
+                            reminderItem.innerHTML = `
+                                <p><strong>Task:</strong> ${reminder.task}</p>
+                                <p><strong>Date:</strong> ${dateStr}</p>
+                                <p><strong>Time:</strong> ${reminder.reminder_time}</p>
+                                <p><strong>Repeat:</strong> ${reminder.repetition || 'None'}</p>
+                                <p><strong>Phone:</strong> ${reminder.phone_number || 'N/A'}</p>
+                                <p><strong>Notes:</strong> ${reminder.notes || 'No notes'}</p>
+                                <button class="delete-btn" onclick="deleteReminder(${reminder.id})">Delete</button>
+                            `;
+                            reminderList.appendChild(reminderItem);
+                        });
+                    } else {
+                        reminderList.innerHTML = '<p>No reminders set yet.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        window.onload = fetchReminders;
+    </script>
+</body>
+</html>

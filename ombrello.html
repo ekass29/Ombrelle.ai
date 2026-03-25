@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Ombrelle - AI Doctor</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/ombrello.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="background-image">
+        <img src="assets/images/medical.jpeg" alt="Background">
+    </div>
+
+    <header class="header">
+        <div class="logo-placeholder">
+            <img src="assets/images/logo.png" alt="Logo">
+        </div>
+        <h1>Dr. Ombrelle (AI Specialist)</h1>
+        <nav><a href="index.html" style="color:white; text-decoration:none;">Home</a></nav>
+    </header>
+
+    <main class="chat-container">
+        <div class="chat-window" id="chat-window">
+            <div class="message bot">
+                👋 Hello. I am <strong>Dr. Ombrelle</strong>. I am here to discuss your medical concerns. Please describe your symptoms.
+            </div>
+        </div>
+
+        <form id="chat-form" class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Type your symptoms here..." required>
+            <button type="submit" class="btn-send">Send</button>
+        </form>
+    </main>
+
+    <script>
+        // --- 1. Initialize History Array ---
+        let chatHistory = [];
+
+        $('#chat-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const userMessage = $('#user-input').val().trim();
+            if (!userMessage) return;
+
+            // Show user message
+            $('#chat-window').append(`<div class="message user">${userMessage}</div>`);
+            $('#user-input').val('');
+            $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+            // Show loading
+            const loadingId = 'loading-' + Date.now();
+            $('#chat-window').append(`<div class="message bot" id="${loadingId}"><em>Dr. Ombrelle is thinking...</em></div>`);
+            $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+            // --- 2. Send History + Message to Backend ---
+            $.ajax({
+                url: '/api/chat',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    message: userMessage,
+                    history: chatHistory // Send the memory!
+                }),
+                success: function(response) {
+                    $(`#${loadingId}`).remove(); 
+                    
+                    // Format response
+                    let formattedReply = response.reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    formattedReply = formattedReply.replace(/\n/g, '<br>'); // Handle line breaks
+
+                    $('#chat-window').append(`<div class="message bot">${formattedReply}</div>`);
+                    $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+                    // --- 3. Update History ---
+                    // Add User's message to history
+                    chatHistory.push({
+                        role: "user",
+                        parts: [{ text: userMessage }]
+                    });
+
+                    // Add Bot's reply to history
+                    chatHistory.push({
+                        role: "model",
+                        parts: [{ text: response.reply }]
+                    });
+                },
+                error: function(xhr) {
+                    $(`#${loadingId}`).remove();
+                    let errorMessage = "Error: Could not reach the server.";
+                    if (xhr.responseJSON && xhr.responseJSON.reply) {
+                        errorMessage = xhr.responseJSON.reply;
+                    }
+                    $('#chat-window').append(`<div class="message bot" style="color:red">${errorMessage}</div>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

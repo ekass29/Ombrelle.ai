@@ -1,0 +1,151 @@
+/* assets/styles/reminder.css */
+
+/* General page container */
+.main-container {
+    max-width: 600px; /* Reduce the width for a more compact form */
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+.header h1 {
+    color: white; /* Ensure this is a visible color */
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+/* Heading Style */
+h1 {
+    color: var(--base-color);
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+/* Reminder Form */
+.reminder-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Reduced gap for a more compact form */
+    margin-bottom: 40px;
+    align-items: center; /* Center align the form fields */
+}
+
+.reminder-form label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    width: 100%; /* Ensure label takes full width */
+    text-align: left; /* Align the text to the left for better readability */
+}
+
+.reminder-form input[type="text"],
+.reminder-form input[type="date"],
+.reminder-form input[type="time"],
+.reminder-form textarea {
+    padding: 12px; /* Slightly reduced padding */
+    font-size: 14px; /* Smaller font size for inputs */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    width: 80%; /* Make inputs smaller and centered */
+    transition: border-color 0.3s;
+    margin-bottom: 10px;
+}
+
+.reminder-form input[type="text"]:focus,
+.reminder-form input[type="date"]:focus,
+.reminder-form input[type="time"]:focus,
+.reminder-form textarea:focus {
+    border-color: var(--base-color);
+    outline: none;
+}
+
+.reminder-form button {
+    padding: 12px 24px;
+    font-size: 16px; /* Slightly smaller button text */
+    color: white;
+    background-color: var(--base-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 80%; /* Button is also smaller and aligned with input fields */
+}
+
+.reminder-form button:hover {
+    background-color: #0056b3;
+}
+
+.reminder-form button:active {
+    background-color: #004494;
+}
+
+/* Reminder List */
+#reminderList {
+    margin-top: 40px;
+}
+
+#reminderList h3 {
+    font-size: 28px;
+    color: var(--base-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Reminder Card Styling */
+.reminder-card {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.reminder-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.reminder-card p {
+    margin: 12px 0;
+    color: var(--text-color);
+    font-size: 18px;
+}
+
+.reminder-card p strong {
+    font-weight: 600;
+}
+
+/* Footer */
+footer {
+    margin-top: 50px;
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* Background Image */
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.background-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

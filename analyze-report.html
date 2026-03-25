@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Medical Report</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/index.css">
+    <style>
+        .upload-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .file-input { margin: 20px 0; }
+        .result-box {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f4f4f4;
+            border-radius: 5px;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Preserves formatting */
+        }
+        .loading { display: none; color: #007bff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="background-image"><img src="assets/images/medical.jpeg"></div>
+
+    <header class="header">
+        <h1>Medical Report Analysis</h1>
+        <nav><a href="index.html" style="color:white;">Back to Home</a></nav>
+    </header>
+
+    <div class="upload-container">
+        <h2>Upload Blood/Lab Report</h2>
+        <p>Upload a clear image (JPG, PNG) or PDF of your medical report. AI will analyze the values.</p>
+        
+        <form id="upload-form">
+            <input type="file" id="report-file" class="file-input" accept="image/*,application/pdf" required>
+            <br>
+            <button type="submit" class="menu-button" style="display:inline-block; width:auto; padding: 10px 30px;">Analyze Now</button>
+        </form>
+
+        <div class="loading" id="loading-msg">Analyzing report... This may take a few seconds...</div>
+        <div class="result-box" id="analysis-result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const loading = document.getElementById('loading-msg');
+        const resultBox = document.getElementById('analysis-result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('report-file');
+            
+            if(fileInput.files.length === 0) return alert("Please select a file");
+
+            const formData = new FormData();
+            formData.append('report', fileInput.files[0]);
+
+            loading.style.display = 'block';
+            resultBox.style.display = 'none';
+            resultBox.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/analyze-report', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    resultBox.style.display = 'block';
+                    // Convert markdown bolding to HTML bolding for display
+                    const formattedText = data.analysis.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    resultBox.innerHTML = formattedText;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                alert('Server error occurred.');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Health Management App</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/register.css">
+</head>
+<body>
+    <div class="background-image">
+        <img src="assets/images/medical.jpeg" alt="Background">
+    </div>
+
+    <header class="header">
+        <div class="logo-placeholder">
+            <img src="assets/images/logo.png" alt="Logo">
+        </div>
+        <h1>Ombrelle</h1>
+    </header>
+
+    <div class="main-container">
+        <h2>Register</h2>
+        <form class="register-form" id="registerForm">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" required>
+
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <p>Already registered? <a href="/login.html">Click here to login</a></p>
+
+            <button type="submit" class="btn-primary">Register</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName, username, email, phoneNumber, password }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.href = '/login.html'; // Redirect after success
+            } else {
+                alert(data.message || 'Registration failed.');
+            }
+        });
+    </script>
+</body>
+</html>

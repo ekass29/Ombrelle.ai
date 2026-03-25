@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ombrelle - Mental Health Support</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/ombrello.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Slightly different theme for Mental Health to distinguish it */
+        .header { background: #6a0dad; } /* Purple theme for calmness */
+        .btn-send { background: #6a0dad; }
+        .message.bot { border-left: 4px solid #6a0dad; }
+    </style>
+</head>
+<body>
+    <div class="background-image">
+        <img src="assets/images/medical.jpeg" alt="Background">
+    </div>
+
+    <header class="header">
+        <h1>Ombrelle Mental Health (Beta)</h1>
+        <nav><a href="index.html" style="color:white; text-decoration:none;">Home</a></nav>
+    </header>
+
+    <main class="chat-container">
+        <div class="chat-window" id="chat-window">
+            <div class="message bot">
+                💜 Hi, I'm your <strong>Mental Health Companion</strong>. I'm here to listen without judgment. How are you feeling today?
+            </div>
+        </div>
+
+        <form id="chat-form" class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Share your thoughts..." required>
+            <button type="submit" class="btn-send">Send</button>
+        </form>
+    </main>
+
+    <script>
+        // Initialize Memory
+        let chatHistory = [];
+
+        $('#chat-form').on('submit', function(e) {
+            e.preventDefault();
+            const userMessage = $('#user-input').val().trim();
+            if (!userMessage) return;
+
+            // Display User Message
+            $('#chat-window').append(`<div class="message user">${userMessage}</div>`);
+            $('#user-input').val('');
+            $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+            // Loading State
+            const loadingId = 'loading-' + Date.now();
+            $('#chat-window').append(`<div class="message bot" id="${loadingId}"><em>Listening...</em></div>`);
+            $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+            // Send to THERAPIST Endpoint
+            $.ajax({
+                url: '/api/therapist', // <--- DIFFERENT ROUTE
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    message: userMessage,
+                    history: chatHistory 
+                }),
+                success: function(response) {
+                    $(`#${loadingId}`).remove(); 
+                    
+                    let formattedReply = response.reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                    
+                    $('#chat-window').append(`<div class="message bot">${formattedReply}</div>`);
+                    $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+
+                    // Update History
+                    chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+                    chatHistory.push({ role: "model", parts: [{ text: response.reply }] });
+                },
+                error: function(xhr) {
+                    $(`#${loadingId}`).remove();
+                    $('#chat-window').append(`<div class="message bot" style="color:red">Connection error.</div>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Health Management App</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link rel="stylesheet" href="assets/styles/login.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="background-image">
+        <img src="assets/images/medical.jpeg" alt="Background">
+    </div>
+
+    <header class="header">
+        <div class="logo-placeholder">
+            <img src="assets/images/logo.png" alt="Logo">
+        </div>
+        <h1>Ombrelle</h1>
+    </header>
+
+    <div class="main-container">
+        <h2>Login</h2>
+        <form class="login-form" id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Enter your username">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password">
+
+            <p>Not registered? <a href="/register.html">Click here to register</a></p>
+
+            <button type="submit" class="btn-primary">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Handle form submission
+        $('#login-form').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get form data
+            const username = $('#username').val();
+            const password = $('#password').val();
+
+            // Send a POST request to /login
+            $.ajax({
+                url: '/login',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ username, password }),
+                success: function(response) {
+                    if (response.success) {
+                        // Redirect to index.html if login is successful
+                        window.location.href = '/index.html'; // Redirect to the index page after successful login
+                    } else {
+                        alert(response.message); // Show an error message if login fails
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while logging in.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
